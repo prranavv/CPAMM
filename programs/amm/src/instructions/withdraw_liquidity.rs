@@ -3,7 +3,7 @@ use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface};
 use anchor_spl::token_2022::{Burn, MintTo, TransferChecked};
 use fixed::types::I64F64;
-use crate::Config;
+use crate::{Config, MINIMUM_LIQUIDITY};
 use crate::error::ErrorCode;
 #[derive(Accounts)]
 pub struct WithdrawLiquidity<'info>{
@@ -72,7 +72,7 @@ impl <'info> WithdrawLiquidity<'info>{
     fn withdraw_liquidity(&mut self,lp_token_number:u64)->Result<()>{
         require!(lp_token_number<=self.mint_lp_account.amount,ErrorCode::AmountNotPresentInAccount);
 
-        let ratio = I64F64::from_num(lp_token_number).checked_div(I64F64::from_num(self.config.total_lp_issued)).unwrap();
+        let ratio = I64F64::from_num(lp_token_number).checked_div(I64F64::from_num(self.config.total_lp_issued+MINIMUM_LIQUIDITY)).unwrap();
         let mint_a_amt = I64F64::from_num(self.vault_a.amount).checked_mul(ratio).unwrap().to_num::<u64>();
         let mint_b_amt = I64F64::from_num(self.vault_b.amount).checked_mul(ratio).unwrap().to_num::<u64>();
         let bump = self.config.lp_bump;
