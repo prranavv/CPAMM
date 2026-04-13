@@ -164,32 +164,6 @@ anchor test
 
 ---
 
-## How the Math Works
-
-```
-Constant Product Invariant:
-  reserve_a × reserve_b = k
-
-Swap Output:
-  output = reserve_out - (k / (reserve_in + amount_in))
-         = reserve_out × amount_in / (reserve_in + amount_in)
-
-First LP Deposit:
-  lp_tokens = √(amount_a × amount_b) - MINIMUM_LIQUIDITY (1000)
-
-Subsequent LP Deposits:
-  lp_tokens = min(
-    amount_a × total_lp / reserve_a,
-    amount_b × total_lp / reserve_b
-  )
-
-Withdrawal:
-  amount_a_out = reserve_a × lp_amount / total_lp
-  amount_b_out = reserve_b × lp_amount / total_lp
-```
-
----
-
 ## FAQ's
 
 **"Why the constant product formula instead of a concentrated liquidity model?"**
