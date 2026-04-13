@@ -214,7 +214,7 @@ Withdrawal:
 
 ## Disclaimer
 
-CPAMM is a learning and portfolio project demonstrating Solana program development with the Anchor framework. It has not been audited and is not intended for production use with real funds. See [Known Limitations](#known-limitations) for current issues. Always conduct a thorough security audit before deploying any DeFi protocol to mainnet.
+CPAMM is a learning and portfolio project demonstrating Solana program development with the Anchor framework. It has not been audited and is not intended for production use with real funds. Always conduct a thorough security audit before deploying any DeFi protocol to mainnet.
 
 ---
 
