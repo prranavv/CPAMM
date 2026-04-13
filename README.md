@@ -129,7 +129,7 @@ When a user swaps token A for token B, the output amount is calculated such that
 ### 1. Clone and build
 
 ```bash
-git clone https://github.com/yourusername/cpamm.git
+git clone https://github.com/prranavv/cpamm.git
 cd cpamm
 
 anchor build
@@ -220,5 +220,5 @@ MIT — see [LICENSE](LICENSE) for details.
 ---
 
 <p align="center">
-  <sub>Built by <a href="https://github.com/yourusername">yourusername</a></sub>
+  <sub>Built by <a href="https://github.com/prranavv">Pranav</a></sub>
 </p>
