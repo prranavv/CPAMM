@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface};
-use anchor_spl::token_2022::{MintTo, TransferChecked};
+use anchor_spl::token_2022::TransferChecked;
 use fixed::types::I64F64;
 
 use crate::Config;

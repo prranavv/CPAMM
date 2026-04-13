@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface};
-use anchor_spl::token_2022::{Burn, MintTo, TransferChecked};
+use anchor_spl::token_2022::{Burn, TransferChecked};
 use fixed::types::I64F64;
 use crate::{Config, MINIMUM_LIQUIDITY};
 use crate::error::ErrorCode;
@@ -73,13 +73,10 @@ impl <'info> WithdrawLiquidity<'info>{
         let ratio = I64F64::from_num(lp_token_number).checked_div(I64F64::from_num(self.config.total_lp_issued+MINIMUM_LIQUIDITY)).unwrap();
         let mint_a_amt = I64F64::from_num(self.vault_a.amount).checked_mul(ratio).unwrap().to_num::<u64>();
         let mint_b_amt = I64F64::from_num(self.vault_b.amount).checked_mul(ratio).unwrap().to_num::<u64>();
-        let bump = self.config.lp_bump;
-        let key=self.config.key();
-        // let signer_seeds: &[&[&[u8]]] = &[&[b"lp",&[bump],key.as_ref()]];
 
         let decimals = self.mint_lp.decimals;
         let cpi_accounts = TransferChecked{
-            mint: self.mint_lp.to_account_info(),
+            mint: self.mint_a.to_account_info(),
             from:self.vault_a.to_account_info(),
             to:self.mint_a_account.to_account_info(),
             authority:self.config.to_account_info()
@@ -92,7 +89,7 @@ impl <'info> WithdrawLiquidity<'info>{
 
         let decimals = self.mint_lp.decimals;
         let cpi_accounts = TransferChecked{
-            mint: self.mint_lp.to_account_info(),
+            mint: self.mint_b.to_account_info(),
             from:self.vault_b.to_account_info(),
             to:self.mint_b_account.to_account_info(),
             authority:self.config.to_account_info()
