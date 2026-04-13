@@ -1,14 +1,10 @@
-<p align="center">
-  <img src="logo.svg" alt="CPAMM Logo" width="180"/>
-</p>
-
 <h1 align="center">CPAMM</h1>
 <p align="center"><strong>Constant Product Automated Market Maker on Solana</strong></p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Rust-1.75+-DEA584?style=flat-square&logo=rust" />
-  <img src="https://img.shields.io/badge/Solana-2.0-9945FF?style=flat-square&logo=solana" />
-  <img src="https://img.shields.io/badge/Anchor-0.30-blue?style=flat-square" />
+  <img src="https://img.shields.io/badge/Solana-3.0-9945FF?style=flat-square&logo=solana" />
+  <img src="https://img.shields.io/badge/Anchor-1.0.0-blue?style=flat-square" />
   <img src="https://img.shields.io/badge/SPL--Token-✓-00D18C?style=flat-square" />
   <img src="https://img.shields.io/badge/Token--2022-✓-00D18C?style=flat-square" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" />
