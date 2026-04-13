@@ -8,9 +8,6 @@ use crate::Config;
 use crate::error::ErrorCode;
 #[derive(Accounts)]
 pub struct SwapTokens<'info>{
-    #[account(mut)]
-    pub initializer:Signer<'info>,
-    
     pub user: Signer<'info>,
     pub mint_a:InterfaceAccount<'info, Mint>,
     pub mint_b:InterfaceAccount<'info, Mint>,
@@ -104,15 +101,16 @@ impl<'info> SwapTokens<'info>{
             token_interface::transfer_checked(cpi_context, amount, decimals).unwrap();
 
             let decimals = self.mint_b.decimals;
+            let signer_seeds: &[&[&[u8]]] = &[&[b"config",&self.config.seed.to_le_bytes(),&[self.config.config_bump]]];
             let cpi_accounts = TransferChecked{
                 mint:self.mint_b.to_account_info(),
                 from:self.vault_b.to_account_info(),
                 to:self.mint_b_account.to_account_info(),
-                authority:self.initializer.to_account_info()
+                authority:self.config.to_account_info()
             };
 
             let cpi_program = self.token_program.to_account_info();
-            let cpi_context = CpiContext::new(*cpi_program.key, cpi_accounts);
+            let cpi_context = CpiContext::new(*cpi_program.key, cpi_accounts).with_signer(signer_seeds);
             token_interface::transfer_checked(cpi_context, output, decimals).unwrap();
 
         }else {
@@ -123,6 +121,7 @@ impl<'info> SwapTokens<'info>{
                 to:self.vault_b.to_account_info(),
                 authority:self.user.to_account_info()
             };
+            let signer_seeds: &[&[&[u8]]] = &[&[b"config",&self.config.seed.to_le_bytes(),&[self.config.config_bump]]];
 
             let cpi_program = self.token_program.to_account_info();
             let cpi_context = CpiContext::new(*cpi_program.key, cpi_accounts);
@@ -133,11 +132,11 @@ impl<'info> SwapTokens<'info>{
                 mint:self.mint_a.to_account_info(),
                 from:self.vault_a.to_account_info(),
                 to:self.mint_a_account.to_account_info(),
-                authority:self.initializer.to_account_info()
+                authority:self.config.to_account_info()
             };
 
             let cpi_program = self.token_program.to_account_info();
-            let cpi_context = CpiContext::new(*cpi_program.key, cpi_accounts);
+            let cpi_context = CpiContext::new(*cpi_program.key, cpi_accounts).with_signer(signer_seeds);
             token_interface::transfer_checked(cpi_context, output, decimals).unwrap();
         }
         Ok(())

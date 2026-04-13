@@ -27,7 +27,7 @@ pub struct Initialize<'info> {
         init,
         payer=initializer,
         associated_token::mint = mint_a,
-        associated_token::authority = initializer,
+        associated_token::authority = config,
         associated_token::token_program = token_program,
     )]
     pub vault_a:InterfaceAccount<'info, TokenAccount>,
@@ -36,7 +36,7 @@ pub struct Initialize<'info> {
         init,
         payer=initializer,
         associated_token::mint = mint_b,
-        associated_token::authority = initializer,
+        associated_token::authority = config,
         associated_token::token_program = token_program,
     )]
     pub vault_b:InterfaceAccount<'info, TokenAccount>,

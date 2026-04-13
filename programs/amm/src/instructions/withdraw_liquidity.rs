@@ -7,8 +7,6 @@ use crate::{Config, MINIMUM_LIQUIDITY};
 use crate::error::ErrorCode;
 #[derive(Accounts)]
 pub struct WithdrawLiquidity<'info>{
-    pub initializer:Signer<'info>,
-    
     pub user: Signer<'info>,
     pub mint_a:InterfaceAccount<'info, Mint>,
     pub mint_b:InterfaceAccount<'info, Mint>,
@@ -29,14 +27,14 @@ pub struct WithdrawLiquidity<'info>{
 
     #[account(
         associated_token::mint = mint_a,
-        associated_token::authority = config.authority,
+        associated_token::authority = config,
         associated_token::token_program = token_program,
     )]
     pub vault_a:InterfaceAccount<'info, TokenAccount>,
 
     #[account(
         associated_token::mint = mint_b,
-        associated_token::authority = config.authority,
+        associated_token::authority = config,
         associated_token::token_program = token_program,
     )]
     pub vault_b:InterfaceAccount<'info, TokenAccount>,
@@ -77,16 +75,17 @@ impl <'info> WithdrawLiquidity<'info>{
         let mint_b_amt = I64F64::from_num(self.vault_b.amount).checked_mul(ratio).unwrap().to_num::<u64>();
         let bump = self.config.lp_bump;
         let key=self.config.key();
-        let signer_seeds: &[&[&[u8]]] = &[&[b"lp",&[bump],key.as_ref()]];
+        // let signer_seeds: &[&[&[u8]]] = &[&[b"lp",&[bump],key.as_ref()]];
 
         let decimals = self.mint_lp.decimals;
         let cpi_accounts = TransferChecked{
             mint: self.mint_lp.to_account_info(),
             from:self.vault_a.to_account_info(),
             to:self.mint_a_account.to_account_info(),
-            authority:self.initializer.to_account_info()
+            authority:self.config.to_account_info()
         };
 
+        let signer_seeds: &[&[&[u8]]] = &[&[b"config",&self.config.seed.to_le_bytes(),&[self.config.config_bump]]];
         let cpi_program = self.token_program.to_account_info();
         let cpi_context = CpiContext::new(*cpi_program.key, cpi_accounts).with_signer(signer_seeds);
         token_interface::transfer_checked(cpi_context, mint_a_amt, decimals).unwrap();
@@ -96,7 +95,7 @@ impl <'info> WithdrawLiquidity<'info>{
             mint: self.mint_lp.to_account_info(),
             from:self.vault_b.to_account_info(),
             to:self.mint_b_account.to_account_info(),
-            authority:self.initializer.to_account_info()
+            authority:self.config.to_account_info()
         };
 
         let cpi_program = self.token_program.to_account_info();
@@ -106,7 +105,7 @@ impl <'info> WithdrawLiquidity<'info>{
         let cpi_accounts = Burn{
             mint:self.mint_lp.to_account_info(),
             from:self.mint_lp_account.to_account_info(),
-            authority:self.initializer.to_account_info()
+            authority:self.config.to_account_info()
         };
         let cpi_context = CpiContext::new(*cpi_program.key, cpi_accounts);
         token_interface::burn(cpi_context, lp_token_number)?;
