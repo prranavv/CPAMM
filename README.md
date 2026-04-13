@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  A Solana-based AMM built with the Anchor framework that enables token swaps and liquidity provision for any SPL token pair using the classic <strong>x × y = k</strong> invariant. Liquidity providers receive LP tokens representing their proportional share of the pool.
+  A permissionless AMM built with the Anchor framework that enables token swaps and liquidity provision for any SPL token pair using the classic <strong>x × y = k</strong> invariant. Liquidity providers receive LP tokens representing their proportional share of the pool.
 </p>
 
 ---
@@ -22,7 +22,7 @@ Decentralized token trading on Solana requires infrastructure that is trustless,
 
 ## The Solution
 
-CPAMM implements the **constant product formula** — the same model pioneered by Uniswap — natively on Solana. Users can create a pool for any token pair, provide liquidity to earn LP tokens, and swap tokens at algorithmically determined prices.
+CPAMM implements the **constant product formula** — the same model pioneered by Uniswap — natively on Solana. Anyone can create a pool for any token pair, provide liquidity to earn LP tokens, and swap tokens at algorithmically determined prices. No order books, no intermediaries, no gatekeepers.
 
 ```
 reserve_a × reserve_b = k
@@ -36,10 +36,11 @@ When a user swaps token A for token B, the output amount is calculated such that
 
 ## Features
 
-- **Pool creation** — create a liquidity pool for any SPL token pair using a unique seed parameter, allowing multiple pools per pair
+- **Permissionless pool creation** — anyone can create a liquidity pool for any SPL token pair using a unique seed parameter, allowing multiple pools per pair
+- **PDA-custodied vaults** — pool reserves are held in associated token accounts owned by the config PDA, ensuring only the program can move funds
 - **Constant product swaps** — token prices determined algorithmically by the `x × y = k` invariant
 - **LP token minting** — liquidity providers receive LP tokens proportional to their share of the pool, redeemable for underlying assets at any time
-- **Minimum liquidity lock** — first deposit permanently locks 1000 LP token units to prevent the pool from being fully drained (a la Uniswap V2)
+- **Minimum liquidity lock** — first deposit permanently locks 1000 LP token units to prevent the pool from being fully drained (à la Uniswap V2)
 - **Proportional withdrawals** — burn LP tokens to receive your exact share of both pool reserves
 - **Ratio-preserving deposits** — subsequent deposits are automatically adjusted to maintain the current pool ratio
 - **Fixed-point arithmetic** — uses `I64F64` fixed-point math for precise ratio calculations, avoiding floating-point rounding errors
@@ -50,10 +51,10 @@ When a user swaps token A for token B, the output amount is calculated such that
 
 | Instruction | Parameters | Description |
 |---|---|---|
-| **`initialize`** | `seed: u64` | Creates a new liquidity pool — sets up the config PDA, LP token mint (PDA), and vault ATAs for both tokens under the initializer's authority. The seed allows multiple pools for the same pair. |
-| **`add_liquidity`** | `mint_amount_a: u64, mint_amount_b: u64` | Deposits tokens into the vaults and mints LP tokens. First deposit: `√(a × b) - MINIMUM_LIQUIDITY`. Subsequent deposits are ratio-adjusted. |
-| **`swap_tokens`** | `swap_a: bool, amount: u64` | Swaps one token for the other. `swap_a = true` swaps A→B, `false` swaps B→A. Output: `k / (reserve_in + amount_in) - reserve_out`. No swap fee is applied. |
-| **`withdraw_liquidity`** | `lp_amount: u64` | Burns LP tokens and returns a proportional share of both pool tokens. Ratio: `lp_amount / (total_lp_issued + MINIMUM_LIQUIDITY)`. |
+| **`initialize`** | `seed: u64` | Creates a new liquidity pool — sets up the config PDA, LP token mint (PDA), and vault ATAs owned by the config PDA. The seed allows multiple pools for the same pair. |
+| **`add_liquidity`** | `mint_amount_a: u64, mint_amount_b: u64` | Deposits tokens into the PDA-owned vaults and mints LP tokens. First deposit: `√(a × b) - MINIMUM_LIQUIDITY`. Subsequent deposits are ratio-adjusted. |
+| **`swap_tokens`** | `swap_a: bool, amount: u64` | Swaps one token for the other. `swap_a = true` swaps A→B, `false` swaps B→A. Output: `k / (reserve_in + amount_in) - reserve_out`. No swap fee is applied. The config PDA signs outbound transfers. |
+| **`withdraw_liquidity`** | `lp_amount: u64` | Burns LP tokens and returns a proportional share of both pool tokens. Ratio: `lp_amount / (total_lp_issued + MINIMUM_LIQUIDITY)`. The config PDA signs outbound transfers. |
 
 ---
 
@@ -81,7 +82,7 @@ When a user swaps token A for token B, the output amount is calculated such that
 
 ### Vaults
 
-The token vaults are **associated token accounts** derived from the initializer's public key and each mint. They are created during `initialize` and hold the pool's reserves.
+The token vaults are **associated token accounts owned by the config PDA**. Only the program can move funds in or out by signing with the config PDA's seeds (`["config", seed.to_le_bytes(), config_bump]`). This ensures trustless custody — no external wallet can drain the pool.
 
 ---
 
